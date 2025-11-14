@@ -20,10 +20,10 @@ RUN apt-get update && \
         net-tools iputils-ping openssh-client \
         # 7. Dev / Debugging Tools
         vim nano htop lsof less tmux \
-        # Shell + dotfile management
-        zsh stow \
         # 8. NLP / Crypto libs
         libffi-dev libssl-dev \
+        # 9. Shell + dotfile management
+        zsh stow \
         # Extra: sudo for non-root user convenience
         sudo \
     && rm -rf /var/lib/apt/lists/*

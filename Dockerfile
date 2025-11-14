@@ -28,10 +28,6 @@ RUN apt-get update && \
         sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# Install fzf: general-purpose, interactive command-line fuzzy finder
-# Prerequisite for zsh's fzf-tab plugin
-RUN git clone --depth 1 https://github.com/junegunn/fzf.git /home/${USERNAME}/.fzf && /home/${USERNAME}/.fzf/install
-
 # Make python/pip default to Python3
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
@@ -60,6 +56,10 @@ RUN git clone https://github.com/tmux-plugins/tpm /home/${USERNAME}/.tmux/plugin
 
 # Install Oh My Zsh (non-interactively)
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" " --unattended"
+
+# Install fzf: general-purpose, interactive command-line fuzzy finder
+# Prerequisite for zsh's fzf-tab plugin
+RUN git clone --depth 1 https://github.com/junegunn/fzf.git /home/${USERNAME}/.fzf && /home/${USERNAME}/.fzf/install
 
 # Clone personal dotfiles and apply zsh/tmux configs via GNU Stow.
 # Remove any existing ~/.zshrc created by the Oh My Zsh installer so stow can place its own.

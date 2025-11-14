@@ -29,6 +29,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install fzf: general-purpose, interactive command-line fuzzy finder
+# Prerequisite for zsh's fzf-tab plugin
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git /home/${USERNAME}/.fzf && /home/${USERNAME}/.fzf/install
 
 # Make python/pip default to Python3

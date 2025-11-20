@@ -28,6 +28,10 @@ RUN apt-get update && \
         sudo \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Pixi (single binary) for root, then move it into /usr/local/bin so all users can execute it
+RUN curl -fsSL https://pixi.sh/install.sh | sh && \
+    mv /root/.pixi/bin/pixi /usr/local/bin/pixi && \
+
 # Make python/pip default to Python3
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1

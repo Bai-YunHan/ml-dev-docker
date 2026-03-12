@@ -8,21 +8,19 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         # 1. Core Build & Utility Tools
         build-essential cmake git git-lfs curl wget unzip pkg-config software-properties-common \
-        # 2. Python + Virtual Environment Essentials
-        python3 python3-pip python3-dev python3-venv python3-setuptools python3-wheel \
-        # 3. Image / Vision Dependencies
+        # 2. Image / Vision Dependencies
         libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 libjpeg-dev libpng-dev libtiff-dev \
-        # 4. Multimedia / Video Tools
+        # 3. Multimedia / Video Tools
         ffmpeg \
-        # 5. Compression, Archive & I/O Tools
+        # 4. Compression, Archive & I/O Tools
         zip gzip tar bzip2 xz-utils \
-        # 6. Networking & SSH Utilities
+        # 5. Networking & SSH Utilities
         net-tools iputils-ping openssh-client \
-        # 7. Dev / Debugging Tools
+        # 6. Dev / Debugging Tools
         vim nano htop lsof less tmux \
-        # 8. NLP / Crypto libs
+        # 7. NLP / Crypto libs
         libffi-dev libssl-dev \
-        # 9. Shell + dotfile management
+        # 8. Shell + dotfile management
         zsh stow \
         # Extra: sudo for non-root user convenience
         sudo \
@@ -31,10 +29,6 @@ RUN apt-get update && \
 # Install Pixi (single binary) for root, then move it into /usr/local/bin so all users can execute it
 RUN curl -fsSL https://pixi.sh/install.sh | sh && \
     mv /root/.pixi/bin/pixi /usr/local/bin/pixi && \
-
-# Make python/pip default to Python3
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # === Create non-root user 'byc' ===
 ARG USERNAME=byc

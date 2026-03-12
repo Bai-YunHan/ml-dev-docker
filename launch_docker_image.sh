@@ -12,13 +12,12 @@ set -euo pipefail
 # -------------------------------------------------------------------
 
 # ----- Host paths -----
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-HOST_PROJECT_DIR="${SCRIPT_DIR}"
+HOST_PROJECT_DIR="${HOME}/workspace"
 HOST_CCACHE_DIR="${HOME}/.ccache"
-HOST_DATA="${HOME}/Data"
+HOST_DATA="${HOME}/data"
 
 # Ensure host dirs exist
-mkdir -p "${HOST_CCACHE_DIR}" "${HOST_DATA}"
+mkdir -p "${HOST_CCACHE_DIR}" "${HOST_DATA}" "${HOST_PROJECT_DIR}"
 
 # ----- Container paths/users -----
 CONTAINER_USER="byc"

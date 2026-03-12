@@ -28,7 +28,7 @@ RUN apt-get update && \
 
 # Install Pixi (single binary) for root, then move it into /usr/local/bin so all users can execute it
 RUN curl -fsSL https://pixi.sh/install.sh | sh && \
-    mv /root/.pixi/bin/pixi /usr/local/bin/pixi && \
+    mv /root/.pixi/bin/pixi /usr/local/bin/pixi
 
 # === Create non-root user 'byc' ===
 ARG USERNAME=byc

@@ -40,7 +40,7 @@ PULSE_DIR="/run/user/$(id -u)/pulse"
 # Build docker run as an array (safe quoting)
 RUN_CMD=( docker run
   --restart unless-stopped # auto-start on daemon restart/reboot unless manually stopped
-  --gpus all # allow use of GPUs
+  --device nvidia.com/gpu=all # allow use of GPUs (CDI mode, works with rootless Docker)
   --ipc=host # allow shared memory access
   --shm-size=2g # set shared memory size
   --network host # allow network access for ROS/MDNS/low-latency comms

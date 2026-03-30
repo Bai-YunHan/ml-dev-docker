@@ -4,11 +4,11 @@ set -euo pipefail
 # -------------------------------------------------------------------
 # Launch a dev container that matches your Dockerfile:
 #   FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
-#   USER byc (UID/GID=1000), sudo NOPASSWD
+#   Runs as root (rootless Docker: container root = host user)
 # Notes:
 # - GPU: requires NVIDIA Container Toolkit on the host.
 # - X11/Pulse: for GUI/audio on Linux desktops.
-# - Network: host networking is useful for ROS/etc; toggle as needed.
+# - Network: host networking is useful for ROS/MDNS/low-latency comms
 # -------------------------------------------------------------------
 
 # ----- Host paths -----
@@ -16,18 +16,27 @@ HOST_PROJECT_DIR="${HOME}/workspace"
 HOST_CCACHE_DIR="${HOME}/.ccache"
 HOST_DATA="${HOME}/data"
 
-# Ensure host dirs exist
-mkdir -p "${HOST_CCACHE_DIR}" "${HOST_DATA}" "${HOST_PROJECT_DIR}"
+# Verify host dirs exist
+for dir in "${HOST_PROJECT_DIR}" "${HOST_DATA}" "${HOST_CCACHE_DIR}"; do
+  if [ ! -d "${dir}" ]; then
+    echo "Error: directory '${dir}' does not exist. Please create it first." >&2
+    exit 1
+  fi
+done
 
-# ----- Container paths/users -----
-CONTAINER_USER="byc"
-CONTAINER_HOME="/home/${CONTAINER_USER}"
+# ----- Container paths -----
+CONTAINER_HOME="/root"
 CONTAINER_PROJECT_DIR="${CONTAINER_HOME}/workspace"
 CONTAINER_DATA="${CONTAINER_HOME}/data"
 
 # ----- Image & container name -----
 BUILD_BASE_DOCKER_IMAGE="${BUILD_BASE_DOCKER_IMAGE:-ml-dev:latest}"
 CONTAINER_NAME="${CONTAINER_NAME:-ml-dev-container}"
+
+# ----- SSH agent forwarding -----
+if [ -z "${SSH_AUTH_SOCK:-}" ]; then
+  echo "Warning: SSH_AUTH_SOCK is not set. SSH agent forwarding will be unavailable inside the container." >&2
+fi
 
 # ----- Desktop integration (Linux) -----
 DISPLAY_VAL="${DISPLAY:-}"                                # empty if headless/SSH
@@ -55,6 +64,7 @@ RUN_CMD=( docker run
   -e DISPLAY="${DISPLAY_VAL}"
   -e XAUTHORITY="${CONTAINER_HOME}/.Xauthority"
   -e PULSE_SERVER="unix:${PULSE_DIR}/native"
+  -e SSH_AUTH_SOCK="/ssh-agent"
 
   # Mount volumes
   -v "${HOST_PROJECT_DIR}:${CONTAINER_PROJECT_DIR}"
@@ -63,21 +73,21 @@ RUN_CMD=( docker run
   -v /tmp/.X11-unix:/tmp/.X11-unix
   -v "${XAUTH_FILE}:${CONTAINER_HOME}/.Xauthority:ro"
   -v "${PULSE_DIR}:${PULSE_DIR}"
+  ${SSH_AUTH_SOCK:+-v "${SSH_AUTH_SOCK}:/ssh-agent"}
+  -v "${HOME}/.ssh/config:${CONTAINER_HOME}/.ssh/config:ro"
 
   # Set working directory
   -w "${CONTAINER_PROJECT_DIR}"
 
   -d  # run detached so container persists independent of shells
-  # Image & long-running PID 1 to keep container alive (sleep infinity)
   "${BUILD_BASE_DOCKER_IMAGE}" sleep infinity
 )
 
 echo "Launching Docker container: ${CONTAINER_NAME}"
-# After reboot, Docker will auto-start it (unless you manually stopped it)
-if docker ps -a --format '{{.Names}}' | grep -wq "${CONTAINER_NAME}"; then # check if container exists
-  if ! docker inspect -f '{{.State.Running}}' "${CONTAINER_NAME}" 2>/dev/null | grep -q true; then # check if container is running
-    docker start "${CONTAINER_NAME}" >/dev/null # start container
+if docker ps -a --format '{{.Names}}' | grep -wq "${CONTAINER_NAME}"; then
+  if ! docker inspect -f '{{.State.Running}}' "${CONTAINER_NAME}" 2>/dev/null | grep -q true; then
+    docker start "${CONTAINER_NAME}" >/dev/null
   fi
 else
-  "${RUN_CMD[@]}" # run container
+  "${RUN_CMD[@]}"
 fi

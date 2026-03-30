@@ -3,12 +3,21 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-# echo "[1/3] Installing Docker..."
-bash "${SCRIPT_DIR}/install_docker.sh"
+echo "[1/4] Installing Docker... [Optional]"
+# bash "${SCRIPT_DIR}/install_docker.sh"
 
-# echo "[2/3] Building Docker image... takes about 4mins"
+# Start ssh-agent
+echo "[2/4] Starting SSH agent..."
+source "${SCRIPT_DIR}/start_ssh_agent.sh"
+
+echo "[3/4] Building Docker image... takes about 4mins"
 IMAGE_TAG="${IMAGE_TAG:-ml-dev:latest}"
-sudo docker build -t "${IMAGE_TAG}" -f "${SCRIPT_DIR}/Dockerfile" "${SCRIPT_DIR}"
+read -p "Use build cache? (Y/n): " use_cache
+if [[ "${use_cache,,}" != "n" ]]; then
+    docker build -t "${IMAGE_TAG}" -f "${SCRIPT_DIR}/Dockerfile" "${SCRIPT_DIR}"
+else
+    docker build --no-cache -t "${IMAGE_TAG}" -f "${SCRIPT_DIR}/Dockerfile" "${SCRIPT_DIR}"
+fi
 
-echo "[3/3] Launching Docker dev container..."
-sudo bash "${SCRIPT_DIR}/launch_docker_image.sh"
+echo "[4/4] Launching Docker dev container..."
+bash "${SCRIPT_DIR}/launch_docker_image.sh"

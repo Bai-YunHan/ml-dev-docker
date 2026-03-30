@@ -59,6 +59,12 @@ RUN rm -f /root/.zshrc && \
     stow zsh && \
     stow tmux
 
+# SSH agent socket path (mounted from host at runtime).
+# Set via both ENV (for non-shell processes) and .zshenv (for interactive zsh,
+# which may not inherit Docker ENV through oh-my-zsh startup chain).
+ENV SSH_AUTH_SOCK="/ssh-agent"
+RUN echo 'export SSH_AUTH_SOCK="/ssh-agent"' > /root/.zshenv
+
 # Make subsequent RUN/CMD/ENTRYPOINT use zsh
 SHELL ["/bin/zsh", "-c"]
 

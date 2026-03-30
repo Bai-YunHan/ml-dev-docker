@@ -64,7 +64,6 @@ RUN_CMD=( docker run
   -e DISPLAY="${DISPLAY_VAL}"
   -e XAUTHORITY="${CONTAINER_HOME}/.Xauthority"
   -e PULSE_SERVER="unix:${PULSE_DIR}/native"
-  -e SSH_AUTH_SOCK="/ssh-agent"
 
   # Mount volumes
   -v "${HOST_PROJECT_DIR}:${CONTAINER_PROJECT_DIR}"

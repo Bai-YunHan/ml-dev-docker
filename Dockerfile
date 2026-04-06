@@ -41,8 +41,14 @@ RUN mkdir -p /root/workspace /root/data
 # Initialize Git-LFS
 RUN git lfs install --skip-smudge
 
-# Install Tmux Plugin Manager
-RUN git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
+# Install Tmux Plugin Manager and pre-install all plugins referenced in .tmux.conf
+# (TPM's install_plugins.sh needs a live tmux server, so we clone them directly here)
+RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && \
+    git clone --depth 1 https://github.com/christoomey/vim-tmux-navigator.git ~/.tmux/plugins/vim-tmux-navigator && \
+    git clone --depth 1 https://github.com/tmux-plugins/tmux-sensible.git     ~/.tmux/plugins/tmux-sensible && \
+    git clone --depth 1 https://github.com/tmux-plugins/tmux-resurrect.git    ~/.tmux/plugins/tmux-resurrect && \
+    git clone --depth 1 https://github.com/tmux-plugins/tmux-continuum.git    ~/.tmux/plugins/tmux-continuum && \
+    git clone --depth 1 https://github.com/dracula/tmux.git                   ~/.tmux/plugins/tmux
 
 # Install Oh My Zsh (non-interactively)
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" " --unattended"
@@ -58,6 +64,9 @@ RUN rm -f /root/.zshrc && \
     cd /root/dotfiles && \
     stow zsh && \
     stow tmux
+
+# Set zsh as root's default login shell so tmux spawns zsh in new panes/windows
+RUN chsh -s /bin/zsh
 
 # SSH agent socket path (mounted from host at runtime).
 # Set via both ENV (for non-shell processes) and .zshenv (for interactive zsh,

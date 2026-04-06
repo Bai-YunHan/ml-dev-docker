@@ -12,7 +12,7 @@ source "${SCRIPT_DIR}/start_ssh_agent.sh"
 
 echo "[3/4] Building Docker image... takes about 4mins"
 IMAGE_TAG="${IMAGE_TAG:-ml-dev:latest}"
-read -p "Use build cache? (Y/n): " use_cache
+read -p "Use build cache? [Enter=yes, n=start from scratch]: " use_cache
 if [[ "${use_cache,,}" != "n" ]]; then
     docker build -t "${IMAGE_TAG}" -f "${SCRIPT_DIR}/Dockerfile" "${SCRIPT_DIR}"
 else

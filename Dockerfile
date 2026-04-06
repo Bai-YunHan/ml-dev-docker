@@ -7,6 +7,8 @@ FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
 
 # Avoid interactive apt dialogs
 ENV DEBIAN_FRONTEND=noninteractive
+# Use a universally available terminal type to avoid "terminals database is inaccessible" errors
+ENV TERM=xterm
 
 # === 1–9: ML Research System Dependencies ===
 RUN apt-get update && \

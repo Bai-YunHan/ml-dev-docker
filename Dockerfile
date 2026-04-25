@@ -7,7 +7,9 @@ FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
 
 # Avoid interactive apt dialogs
 ENV DEBIAN_FRONTEND=noninteractive
-# Use a universally available terminal type to avoid "terminals database is inaccessible" errors
+# Pixi shell overrides library/terminfo paths, making system terminfo
+# invisible to its bundled ncurses. Copying entries into ~/.terminfo
+# works because ncurses unconditionally checks ~/.terminfo first.
 ENV TERM=xterm
 
 # === 1–9: ML Research System Dependencies ===
@@ -36,6 +38,17 @@ RUN curl -fsSL https://pixi.sh/install.sh | sh && \
     mv /root/.pixi/bin/pixi /usr/local/bin/pixi
 
 WORKDIR /root
+
+# Copy system terminfo into ~/.terminfo and create hex-named symlinks.
+# System terminfo uses letter dirs (x/xterm), but pixi's conda-forge ncurses
+# expects hex-named dirs (78/xterm). Symlinks let both conventions resolve.
+RUN cp -r /usr/lib/terminfo /root/.terminfo && \
+    for dir in /root/.terminfo/*/; do \
+        letter=$(basename "$dir"); \
+        hex=$(printf '%02x' "'$letter"); \
+        [ "$letter" != "$hex" ] && [ ! -e "/root/.terminfo/$hex" ] && \
+            ln -s "$letter" "/root/.terminfo/$hex"; \
+    done
 
 # Create working dirs
 RUN mkdir -p /root/workspace /root/data
